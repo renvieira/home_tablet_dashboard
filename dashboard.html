@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard Casa – Rennan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg: #05050a;
+      --bg-elevated: #11121a;
+      --bg-card: #181926;
+      --text: #f5f5f7;
+      --text-soft: #a9b0c3;
+      --accent: #4f8cff;
+      --accent-soft: rgba(79, 140, 255, 0.18);
+      --danger: #ff4f6a;
+      --success: #3dd68c;
+      --border-soft: rgba(255,255,255,0.05);
+      --shadow-soft: 0 18px 45px rgba(0,0,0,0.55);
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --blur: 18px;
+      --transition-fast: 0.18s ease-out;
+      --font-main: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100vh;
+      width: 100vw;
+      background: radial-gradient(circle at top, #151729 0, #05050a 50%);
+      color: var(--text);
+      font-family: var(--font-main);
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden; /* Garante que não haverá scroll indesejado */
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0; /* Removido padding do body para ocupar 100% */
+    }
+
+    .dashboard {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(8,10,20,0.94), rgba(5,5,10,0.98));
+      border-radius: 0; /* Removido border-radius para ocupar 100% da tela */
+      padding: 16px 18px; /* Mantido padding interno para o conteúdo */
+      display: grid;
+      /* Ajuste para preencher 100% do espaço:
+         Relógio/Clima (20%)
+         Ticker (10%)
+         Notícias Financeiras (35% - maior)
+         Breaking Mundo (17.5%)
+         Tênis (17.5%)
+         Total: 100%
+      */
+      grid-template-rows: 20% 10% 35% 17.5% 17.5%; 
+      gap: 10px;
+      box-shadow: none; /* Removido sombra para ocupar 100% da tela */
+      border: none; /* Removido borda para ocupar 100% da tela */
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dashboard::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background:
+        radial-gradient(circle at top left, rgba(79,140,255,0.08), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(61,214,140,0.05), transparent 55%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .dashboard-inner {
+      position: relative;
+      z-index: 1;
+      display: contents;
+    }
+
+    .row { 
+      display: grid; 
+      gap: 10px;
+      min-height: 0;
+    }
+
+    .row-top     { grid-template-columns: 2.2fr 1.4fr; }
+    .row-ticker  { grid-template-columns: 1fr; }
+    .row-finance { grid-template-columns: 1fr; }
+    .row-bottom  { grid-template-columns: 1fr 1fr; }
+
+    .card {
+      background: radial-gradient(circle at top left, rgba(79,140,255,0.14), transparent 45%),
+                  linear-gradient(145deg, rgba(14,18,30,0.96), rgba(11,12,22,0.98));
+      border-radius: var(--radius-lg);
+      padding: 12px 16px; /* Aumentado padding */
+      border: 1px solid var(--border-soft);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.55);
+      display: flex;
+      flex-direction: column;
+      gap: 8px; /* Aumentado gap */
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(var(--blur));
+      min-height: 0;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top right, rgba(255,255,255,0.02), transparent 55%);
+      pointer-events: none;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px; /* Aumentado gap */
+      position: relative;
+      z-index: 1;
+      flex-shrink: 0;
+      margin-bottom: 3px; /* Aumentado margin */
+    }
+
+    .card-title {
+      font-size: 1.02rem; /* Aumentado ~20% de 0.85rem */
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-soft);
+    }
+
+    .card-subtitle {
+      font-size: 0.86rem; /* Aumentado ~20% de 0.72rem */
+      color: var(--text-soft);
+      opacity: 0.8;
+    }
+
+    .badge {
+      font-size: 0.84rem; /* Aumentado ~20% de 0.7rem */
+      padding: 4px 10px; /* Aumentado padding */
+      border-radius: 999px;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--text-soft);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px; /* Aumentado gap */
+      white-space: nowrap;
+    }
+
+    .badge-dot {
+      width: 7px; /* Aumentado */
+      height: 7px; /* Aumentado */
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 10px rgba(61,214,140,0.8);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.5} }
+
+    #clock-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      z-index: 1;
+      min-height: 0;
+    }
+
+    #time { font-size: 3.8rem; font-weight: 600; letter-spacing: 0.06em; } /* Aumentado ~20% de 3.2rem */
+    #date { font-size: 1.18rem; color: var(--text-soft); } /* Aumentado ~20% de 0.98rem */
+
+    .clock-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 5px; /* Aumentado margin */
+      font-size: 0.96rem; /* Aumentado ~20% de 0.8rem */
+      color: var(--text-soft);
+    }
+
+    #weather-main {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px; /* Aumentado gap */
+      position: relative;
+      z-index: 1;
+    }
+
+    .weather-temp { font-size: 2.8rem; font-weight: 500; } /* Aumentado ~20% de 2.3rem */
+    .weather-city { font-size: 1.15rem; color: var(--text-soft); } /* Aumentado ~20% de 0.96rem */
+    .weather-desc { font-size: 1.03rem; color: var(--text-soft); } /* Aumentado ~20% de 0.86rem */
+
+    .weather-extra {
+      display: flex;
+      gap: 12px; /* Aumentado gap */
+      margin-top: 5px; /* Aumentado margin */
+      font-size: 0.94rem; /* Aumentado ~20% de 0.78rem */
+      color: var(--text-soft);
+      flex-wrap: wrap;
+    }
+
+    .news-container {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .news-list {
+      margin-top: 3px; /* Aumentado margin */
+      display: flex;
+      flex-direction: column;
+      gap: 7px; /* Aumentado gap */
+      overflow-y: scroll;
+      overflow-x: hidden;
+      padding-right: 10px; /* Aumentado padding */
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      min-height: 0;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: auto;
+      scrollbar-color: #a0aab4 #1e232d;
+    }
+
+    .news-list::-webkit-scrollbar {
+      width: 12px; /* Aumentado */
+      background: #1e232d;
+      border-radius: 7px; /* Aumentado */
+    }
+
+    .news-list::-webkit-scrollbar-track {
+      background: #1e232d;
+      border-radius: 7px; /* Aumentado */
+      margin: 5px 0; /* Aumentado */
+    }
+
+    .news-list::-webkit-scrollbar-thumb {
+      background: #a0aab4;
+      border-radius: 7px; /* Aumentado */
+      border: 2px solid #1e232d;
+      min-height: 35px; /* Aumentado */
+    }
+
+    .news-list::-webkit-scrollbar-thumb:hover {
+      background: #b4bec9;
+    }
+
+    .news-item {
+      font-size: 0.98rem; /* Aumentado ~20% de 0.82rem */
+      color: var(--text-soft);
+      border-radius: 12px; /* Aumentado */
+      padding: 10px 12px; /* Aumentado padding */
+      background: rgba(9,11,22,0.9);
+      border: 1px solid rgba(255,255,255,0.03);
+      transition: all var(--transition-fast);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .news-item:hover {
+      background: rgba(15,17,28,0.95);
+      border-color: rgba(79,140,255,0.15);
+    }
+
+    .news-item-title {
+      color: var(--text);
+      margin-bottom: 4px; /* Aumentado margin */
+      line-height: 1.4;
+    }
+
+    .news-item-meta {
+      font-size: 0.86rem; /* Aumentado ~20% de 0.72rem */
+      opacity: 0.8;
+    }
+
+    /* ===== Barra de Tickers Rolante ===== */
+    .ticker-card {
+      padding: 8px 16px; /* Ajustado padding para diminuir altura e centralizar */
+    }
+
+    .ticker-wrapper {
+      position: relative;
+      overflow: hidden;
+      height: 36px; /* Altura um pouco maior para acomodar fonte */
+      display: flex;
+      align-items: center;
+    }
+
+    .ticker-track {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 30px; /* Aumentado gap */
+      white-space: nowrap;
+      will-change: transform;
+      animation: ticker-scroll 45s linear infinite;
+    }
+
+    .ticker-item {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 8px; /* Aumentado gap */
+      font-size: 1.7rem; /* Dobrado de 0.85rem */
+      color: var(--text-soft);
+    }
+
+    .ticker-symbol {
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 1.56rem; /* Dobrado de 0.78rem */
+      color: #d0d7ff;
+    }
+
+    .ticker-price {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .ticker-change {
+      font-size: 1.6rem; /* Dobrado de 0.8rem */
+    }
+
+    .ticker-change.up { color: var(--success); }
+    .ticker-change.down { color: var(--danger); }
+
+    @keyframes ticker-scroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* Media queries para tablets e telas menores */
+    @media (max-width: 1024px) { /* Samsung A7 em landscape é ~1280x800, mas vamos considerar 1024px como um bom breakpoint */
+      .dashboard {
+        border-radius: 0; /* Garante que não haverá bordas arredondadas em telas cheias */
+        box-shadow: none; /* Remove sombra para telas cheias */
+        padding: 12px 14px; /* Ajusta padding interno para telas menores */
+        gap: 8px; /* Reduz o gap entre as linhas */
+      }
+      .card {
+        padding: 10px 12px; /* Ajusta padding dos cards */
+        gap: 6px; /* Reduz o gap dentro dos cards */
+      }
+      .card-header {
+        gap: 8px;
+        margin-bottom: 2px;
+      }
+      .card-title { font-size: 0.95rem; }
+      .card-subtitle { font-size: 0.8rem; }
+      .badge { font-size: 0.78rem; padding: 3px 8px; }
+      .badge-dot { width: 6px; height: 6px; }
+
+      #time { font-size: 3.2rem; }
+      #date { font-size: 1.05rem; }
+      .clock-footer { font-size: 0.88rem; }
+
+      .weather-temp { font-size: 2.4rem; }
+      .weather-city { font-size: 1.05rem; }
+      .weather-desc { font-size: 0.95rem; }
+      .weather-extra { font-size: 0.85rem; gap: 10px; }
+      #weather-icon { font-size: 2.4rem !important; }
+
+      .news-item { font-size: 0.9rem; padding: 8px 10px; border-radius: 10px; }
+      .news-item-title { margin-bottom: 3px; }
+      .news-item-meta { font-size: 0.8rem; }
+      .news-list { gap: 6px; padding-right: 8px; }
+      .news-list::-webkit-scrollbar { width: 10px; }
+      .news-list::-webkit-scrollbar-track { margin: 4px 0; }
+      .news-list::-webkit-scrollbar-thumb { min-height: 30px; border-radius: 6px; }
+
+      .ticker-card { padding: 6px 12px; }
+      .ticker-wrapper { height: 32px; }
+      .ticker-track { gap: 24px; animation-duration: 35s; }
+      .ticker-item { font-size: 1.4rem; gap: 6px; }
+      .ticker-symbol { font-size: 1.3rem; }
+      .ticker-price { font-size: 1.4rem; }
+      .ticker-change { font-size: 1.3rem; }
+    }
+
+    @media (max-width: 768px) { /* Modo retrato de tablets ou celulares grandes */
+      .dashboard {
+        grid-template-rows: auto auto auto auto auto; /* Volta para auto para melhor adaptação */
+        padding: 10px 12px;
+        gap: 6px;
+      }
+      .row-top { grid-template-columns: 1fr; } /* Relógio e clima um abaixo do outro */
+      .row-bottom { grid-template-columns: 1fr; } /* Notícias um abaixo do outro */
+
+      #time { font-size: 2.8rem; }
+      #date { font-size: 0.95rem; }
+      .clock-footer { font-size: 0.8rem; }
+
+      .weather-temp { font-size: 2rem; }
+      .weather-city { font-size: 0.9rem; }
+      .weather-desc { font-size: 0.8rem; }
+      .weather-extra { font-size: 0.75rem; gap: 8px; }
+      #weather-icon { font-size: 2rem !important; }
+
+      .news-item { font-size: 0.85rem; padding: 6px 8px; }
+      .news-item-title { margin-bottom: 2px; }
+      .news-item-meta { font-size: 0.75rem; }
+      .news-list { gap: 4px; padding-right: 6px; }
+      .news-list::-webkit-scrollbar { width: 8px; }
+      .news-list::-webkit-scrollbar-track { margin: 2px 0; }
+      .news-list::-webkit-scrollbar-thumb { min-height: 25px; border-radius: 5px; }
+
+      .ticker-wrapper { height: 28px; }
+      .ticker-track { animation-duration: 25s; }
+      .ticker-item { font-size: 1.2rem; }
+      .ticker-symbol { font-size: 1.1rem; }
+      .ticker-price { font-size: 1.2rem; }
+      .ticker-change { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <div class="dashboard-inner">
+
+      <!-- Linha 0: Relógio + Clima -->
+      <div class="row row-top">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Relógio</div>
+              <div class="card-subtitle">Arujá · Painel da Casa</div>
+            </div>
+            <span class="badge">
+              <span class="badge-dot"></span>
+              Online
+            </span>
+          </div>
+          <div id="clock-container">
+            <div>
+              <div id="time">--:--</div>
+              <div id="date">Carregando data...</div>
+            </div>
+            <div class="clock-footer">
+              <span id="day-of-week">—</span>
+              <span id="last-sync">Sincronizando...</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Clima</div>
+              <div class="card-subtitle">Arujá · Atualizado em tempo real</div>
+            </div>
+            <span class="badge" id="weather-updated">—</span>
+          </div>
+          <div id="weather-main">
+            <div>
+              <div class="weather-temp" id="weather-temp">--°C</div>
+              <div id="weather-city" class="weather-city">Arujá, SP</div>
+              <div id="weather-desc" class="weather-desc">Carregando...</div>
+            </div>
+            <div id="weather-icon" class="weather-icon"></div>
+          </div>
+          <div id="weather-extra" class="weather-extra">
+            <span id="weather-feels">Sensação: --°C</span>
+            <span id="weather-humidity">Umidade: --%</span>
+            <span id="weather-wind">Vento: -- m/s</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Linha 1: Ticker Rolante -->
+      <div class="row row-ticker">
+        <div class="card ticker-card">
+          <div class="ticker-wrapper">
+            <div class="ticker-track" id="ticker-track">
+              <!-- Ticker items will be populated by JavaScript -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Linha 2: Notícias de Mercado Financeiro -->
+      <div class="row row-finance">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Notícias</div>
+              <div class="card-subtitle">Mercado Financeiro · InfoMoney</div>
+            </div>
+            <span class="badge" id="news-finance-updated">—</span>
+          </div>
+          <div class="news-container">
+            <div class="news-list" id="news-finance">
+              <div class="news-item"><div class="news-item-title">Carregando notícias...</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Linha 3 e 4: Notícias Globais e Tênis -->
+      <div class="row row-bottom">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Breaking News</div>
+              <div class="card-subtitle">Mundo · Google Notícias</div>
+            </div>
+            <span class="badge" id="news-world-updated">—</span>
+          </div>
+          <div class="news-container">
+            <div class="news-list" id="news-world">
+              <div class="news-item"><div class="news-item-title">Carregando notícias...</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Notícias</div>
+              <div class="card-subtitle">Tênis · Google Notícias (PT-BR)</div>
+            </div>
+            <span class="badge" id="news-tennis-updated">—</span>
+          </div>
+          <div class="news-container">
+            <div class="news-list" id="news-tennis">
+              <div class="news-item"><div class="news-item-title">Carregando notícias...</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // ========= Funções de data/hora =========
+    function formatTimeHM(date) {
+      if (!date) return '';
+      const d = new Date(date);
+      const hours = String(d.getHours()).padStart(2, '0');
+      const minutes = String(d.getMinutes()).padStart(2, '0');
+      return `${hours}:${minutes}`;
+    }
+
+    function formatDateDM(date) {
+      if (!date) return '';
+      const d = new Date(date);
+      const day = d.getDate();
+      const month = d.toLocaleDateString('pt-BR', { month: 'long' });
+      return `${day} de ${month.charAt(0).toUpperCase()}${month.slice(1)}`;
+    }
+
+    function formatDayOfWeek(date) {
+      if (!date) return '';
+      const d = new Date(date);
+      return d.toLocaleDateString('pt-BR', { weekday: 'long' });
+    }
+
+    function setBadgeText(id, date) {
+      const badge = document.getElementById(id);
+      if (!badge) return;
+      if (!date) { badge.textContent = '—'; return; }
+      const timeStr = formatTimeHM(date) || 'agora';
+      badge.textContent = timeStr;
+    }
+
+    // ========= Relógio =========
+    function updateClock() {
+      const now = new Date();
+      const timeElement = document.getElementById('time');
+      const dateElement = document.getElementById('date');
+      const dayOfWeekElement = document.getElementById('day-of-week');
+      const lastSyncElement = document.getElementById('last-sync');
+
+      timeElement.textContent = formatTimeHM(now);
+      dateElement.textContent = formatDateDM(now);
+      dayOfWeekElement.textContent = formatDayOfWeek(now);
+      lastSyncElement.textContent = `Última sincronização: ${formatTimeHM(now)}`;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // ========= Clima =========
+    async function fetchWeather() {
+      try {
+        const apiKey = 'de9ee2ae39544f302cd1bbd2f9e75eb3';
+        const lat = -23.3961;
+        const lon = -46.3200;
+        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&lang=pt_br&units=metric`;
+
+        const res = await fetch(url);
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error('❌ Erro OpenWeather:', res.status, errorText);
+          document.getElementById('weather-desc').textContent = 'Aguardando ativação da API...';
+          return;
+        }
+        const data = await res.json();
+
+        const temp = Math.round(data.main.temp);
+        const feels = Math.round(data.main.feels_like);
+        const humidity = data.main.humidity;
+        const wind = data.wind.speed;
+        const desc = data.weather?.[0]?.description || '';
+        const iconCode = data.weather?.[0]?.icon || '';
+
+        document.getElementById('weather-temp').textContent = `${temp}°C`;
+        document.getElementById('weather-desc').textContent =
+          desc.charAt(0).toUpperCase() + desc.slice(1);
+        document.getElementById('weather-feels').textContent = `Sensação: ${feels}°C`;
+        document.getElementById('weather-humidity').textContent = `Umidade: ${humidity}%`;
+        document.getElementById('weather-wind').textContent = `Vento: ${wind.toFixed(1)} m/s`;
+
+        const iconEl = document.getElementById('weather-icon');
+        if (iconCode.startsWith('01')) iconEl.textContent = '☀️';
+        else if (iconCode.startsWith('02')) iconEl.textContent = '🌤️';
+        else if (iconCode.startsWith('03') || iconCode.startsWith('04')) iconEl.textContent = '☁️';
+        else if (iconCode.startsWith('09') || iconCode.startsWith('10')) iconEl.textContent = '🌧️';
+        else if (iconCode.startsWith('11')) iconEl.textContent = '⛈️';
+        else if (iconCode.startsWith('13')) iconEl.textContent = '❄️';
+        else if (iconCode.startsWith('50')) iconEl.textContent = '🌫️';
+
+        setBadgeText('weather-updated', new Date());
+      } catch (err) {
+        console.error('❌ Erro clima:', err);
+        document.getElementById('weather-desc').textContent = 'Aguardando ativação...';
+      }
+    }
+    fetchWeather();
+    setInterval(fetchWeather, 10 * 60 * 1000);
+
+    // ========= Dados para Ticker =========
+    window.tickerData = {
+      usdbrl: null,
+      eurbrl: null,
+      btc: null,
+      eth: null,
+      sp500: null,
+      ibov: null,
+      gold: null,
+      silver: null
+    };
+
+    async function fetchQuotes() {
+      try {
+        const usdRes = await fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL');
+        const usdData = await usdRes.json();
+        if (usdData.USDBRL) {
+          const price = parseFloat(usdData.USDBRL.bid);
+          const change = parseFloat(usdData.USDBRL.pctChange);
+          window.tickerData.usdbrl = { price, change };
+        }
+
+        const cryptoRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true');
+        const cryptoData = await cryptoRes.json();
+        if (cryptoData.bitcoin) {
+          window.tickerData.btc = {
+            price: cryptoData.bitcoin.usd,
+            change: cryptoData.bitcoin.usd_24h_change || 0
+          };
+        }
+        if (cryptoData.ethereum) {
+          window.tickerData.eth = {
+            price: cryptoData.ethereum.usd,
+            change: cryptoData.ethereum.usd_24h_change || 0
+          };
+        }
+
+        setBadgeText('quotes-updated', new Date());
+      } catch (err) {
+        console.error('❌ Erro geral ao buscar cotações:', err);
+        setBadgeText('quotes-updated', null);
+      }
+
+      buildTickerBar();
+    }
+
+    function isMetalsPauseTime() {
+      const now = new Date();
+      const hour = now.getHours();
+      return hour < 9 || hour >= 18;
+    }
+
+    async function fetchMetals() {
+      if (isMetalsPauseTime()) {
+        loadMetalsFromCache();
+        buildTickerBar();
+        return;
+      }
+
+      try {
+        const usdBrlData = await fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL').then(r => r.json());
+        const usdBrlRate = parseFloat(usdBrlData.USDBRL?.bid || 5.0);
+
+        const OUNCE_TO_GRAM = 31.1035;
+        const alphaApiKey = '7DLPNZGF5ZSIVP0V';
+        const baseUrl = 'https://www.alphavantage.co/query';
+
+        const [goldData, silverData] = await Promise.all([
+          fetch(`${baseUrl}?function=CURRENCY_EXCHANGE_RATE&from_currency=XAU&to_currency=USD&apikey=${alphaApiKey}`).then(r => r.json()),
+          fetch(`${baseUrl}?function=CURRENCY_EXCHANGE_RATE&from_currency=XAG&to_currency=USD&apikey=${alphaApiKey}`).then(r => r.json())
+        ]);
+
+        const now = new Date();
+
+        if (goldData['Realtime Currency Exchange Rate']) {
+          const goldRate = goldData['Realtime Currency Exchange Rate'];
+          const goldUSDPerOunce = parseFloat(goldRate['5. Exchange Rate']);
+          const goldUSDPerGram = goldUSDPerOunce / OUNCE_TO_GRAM;
+          const goldBRLPerGram = goldUSDPerGram * usdBrlRate;
+
+          localStorage.setItem('gold_price', goldBRLPerGram.toFixed(2));
+          localStorage.setItem('gold_updated', now.toISOString());
+
+          window.tickerData.gold = { price: parseFloat(goldBRLPerGram.toFixed(2)) };
+        } else {
+          loadMetalsFromCache();
+        }
+
+        if (silverData['Realtime Currency Exchange Rate']) {
+          const silverRate = silverData['Realtime Currency Exchange Rate'];
+          const silverUSDPerOunce = parseFloat(silverRate['5. Exchange Rate']);
+          const silverUSDPerGram = silverUSDPerOunce / OUNCE_TO_GRAM;
+          const silverBRLPerGram = silverUSDPerOunce / OUNCE_TO_GRAM * usdBrlRate;
+
+          localStorage.setItem('silver_price', silverBRLPerGram.toFixed(2));
+          localStorage.setItem('silver_updated', now.toISOString());
+
+          window.tickerData.silver = { price: parseFloat(silverBRLPerGram.toFixed(2)) };
+        } else {
+          loadMetalsFromCache();
+        }
+
+      } catch (err) {
+        console.error('❌ Erro ao buscar metais:', err);
+        loadMetalsFromCache();
+      }
+
+      buildTickerBar();
+    }
+
+    function loadMetalsFromCache() {
+      const goldPrice = localStorage.getItem('gold_price');
+      const silverPrice = localStorage.getItem('silver_price');
+
+      if (goldPrice) {
+        window.tickerData.gold = { price: parseFloat(goldPrice) };
+      }
+      if (silverPrice) {
+        window.tickerData.silver = { price: parseFloat(silverPrice) };
+      }
+    }
+
+    async function fetchExtraForTicker() {
+      try {
+        const eurRes = await fetch('https://economia.awesomeapi.com.br/json/last/EUR-BRL');
+        const eurData = await eurRes.json();
+        if (eurData.EURBRL) {
+          const price = parseFloat(eurData.EURBRL.bid);
+          const change = parseFloat(eurData.EURBRL.pctChange);
+          window.tickerData.eurbrl = { price, change };
+        }
+      } catch (e) {
+        console.warn('⚠️ EUR falhou, usando padrão');
+      }
+
+      try {
+        const yahooUrl = 'https://query2.finance.yahoo.com/v8/finance/chart/%5EGSPC?interval=1d&range=1d';
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`;
+        const res = await fetch(proxyUrl);
+        if (res.ok) {
+          const proxyData = await res.json();
+          const spData = JSON.parse(proxyData.contents);
+          if (spData.chart && spData.chart.result && spData.chart.result.length > 0) {
+            const result = spData.chart.result[0];
+            const meta = result.meta;
+            const price = meta.regularMarketPrice;
+            const prevClose = meta.chartPreviousClose;
+            const change = ((price - prevClose) / prevClose) * 100;
+            window.tickerData.sp500 = { price, change };
+          }
+        }
+      } catch (e) {
+        console.warn('⚠️ S&P 500 falhou ou CORS bloqueou, usando padrão');
+      }
+
+      if (!window.tickerData.ibov) {
+        window.tickerData.ibov = null;
+      }
+
+      buildTickerBar();
+    }
+
+    function buildTickerBar() {
+      const track = document.getElementById('ticker-track');
+      if (!track) return;
+
+      track.innerHTML = '';
+
+      function createTickerItem(label, price, change, isCurrency, suffix) {
+        const item = document.createElement('div');
+        item.className = 'ticker-item';
+
+        const sym = document.createElement('span');
+        sym.className = 'ticker-symbol';
+        sym.textContent = label;
+
+        const p = document.createElement('span');
+        p.className = 'ticker-price';
+
+        if (price == null || isNaN(price)) {
+          p.textContent = '--';
+        } else {
+          if (isCurrency) {
+            p.textContent = `R$ ${price.toFixed(2)}`;
+          } else if (suffix) {
+            p.textContent = `${price.toLocaleString('pt-BR', { maximumFractionDigits: 0 })} ${suffix}`;
+          } else {
+            p.textContent = price.toLocaleString('pt-BR', { maximumFractionDigits: 2 });
+          }
+        }
+
+        const ch = document.createElement('span');
+        ch.className = 'ticker-change';
+        if (typeof change === 'number' && !isNaN(change)) {
+          const sign = change > 0 ? '+' : '';
+          ch.textContent = `${sign}${change.toFixed(2)}%`;
+          if (change > 0) ch.classList.add('up');
+          if (change < 0) ch.classList.add('down');
+        } else {
+          ch.textContent = '';
+        }
+
+        item.appendChild(sym);
+        item.appendChild(p);
+        if (ch.textContent) item.appendChild(ch);
+        return item;
+      }
+
+      const d = window.tickerData;
+
+      track.appendChild(createTickerItem('DÓLAR', d.usdbrl?.price ?? null, d.usdbrl?.change ?? null, true));
+      track.appendChild(createTickerItem('EURO', d.eurbrl?.price ?? null, d.eurbrl?.change ?? null, true));
+      track.appendChild(createTickerItem('BITCOIN', d.btc?.price ?? null, d.btc?.change ?? null, false, 'USD'));
+      track.appendChild(createTickerItem('ETHEREUM', d.eth?.price ?? null, d.eth?.change ?? null, false, 'USD'));
+      track.appendChild(createTickerItem('S&P 500', d.sp500?.price ?? null, d.sp500?.change ?? null, false, 'pts'));
+      track.appendChild(createTickerItem('IBOVESPA', 130000, 0.00, false, 'pts'));
+
+      if (d.gold?.price != null) {
+        track.appendChild(createTickerItem('OURO', d.gold.price, null, true));
+      } else {
+        track.appendChild(createTickerItem('OURO', null, null, true));
+      }
+
+      if (d.silver?.price != null) {
+        track.appendChild(createTickerItem('PRATA', d.silver.price, null, true));
+      } else {
+        track.appendChild(createTickerItem('PRATA', null, null, true));
+      }
+
+      const itemsHTML = track.innerHTML;
+      track.innerHTML = itemsHTML + itemsHTML;
+    }
+
+    async function fetchRSSFeed(rssUrl, containerId, badgeId) {
+      try {
+        const url = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Erro ao buscar RSS');
+        const data = await res.json();
+
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+
+        const items = (data.items || []).slice(0, 25);
+        if (!items.length) {
+          container.innerHTML = '<div class="news-item"><div class="news-item-title">Sem manchetes no momento.</div></div>';
+          return;
+        }
+
+        items.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'news-item';
+
+          const title = document.createElement('div');
+          title.className = 'news-item-title';
+          title.textContent = item.title;
+
+          const meta = document.createElement('div');
+          meta.className = 'news-item-meta';
+          const pubTime = item.pubDate ? formatTimeHM(item.pubDate) : '';
+          const pubDateFormatted = item.pubDate ? formatDateDM(item.pubDate) : '';
+
+          if (pubTime && pubDateFormatted) {
+            meta.textContent = `Publicado às ${pubTime} - ${pubDateFormatted}`;
+          } else if (pubTime) {
+            meta.textContent = `Publicado às ${pubTime}`;
+          } else if (pubDateFormatted) {
+            meta.textContent = `Publicado em ${pubDateFormatted}`;
+          } else {
+            meta.textContent = '';
+          }
+
+          div.appendChild(title);
+          if (meta.textContent) div.appendChild(meta);
+          container.appendChild(div);
+        });
+
+        setBadgeText(badgeId, new Date());
+      } catch (err) {
+        console.error(`❌ Erro RSS (${containerId}):`, err);
+        const container = document.getElementById(containerId);
+        container.innerHTML =
+          '<div class="news-item"><div class="news-item-title">Erro ao carregar notícias.</div></div>';
+        setBadgeText(badgeId, null);
+      }
+    }
+
+    function updateNews() {
+      const infomoney = 'https://www.infomoney.com.br/feed/';
+      const googleNews = 'https://news.google.com/rss?hl=pt-BR&gl=BR&ceid=BR:pt-419';
+
+      // Tênis esportivo em PT-BR: busca afinada para reduzir “calçado”
+      const googleTennisPt = 'https://news.google.com/rss/search?q=' +
+        encodeURIComponent('tênis AND (ATP OR WTA OR "Grand Slam" OR Roland Garros OR Wimbledon OR "US Open" OR "Australian Open")') +
+        '&hl=pt-BR&gl=BR&ceid=BR:pt-419';
+
+      fetchRSSFeed(infomoney, 'news-finance', 'news-finance-updated');
+      fetchRSSFeed(googleNews, 'news-world', 'news-world-updated');
+      fetchRSSFeed(googleTennisPt, 'news-tennis', 'news-tennis-updated');
+    }
+
+    updateNews();
+    setInterval(updateNews, 5 * 60 * 1000);
+
+    // ========= Inicialização =========
+    fetchQuotes();
+    setInterval(fetchQuotes, 60 * 1000);
+
+    loadMetalsFromCache();
+    fetchMetals();
+    setInterval(fetchMetals, 60 * 60 * 1000);
+
+    buildTickerBar();
+    fetchExtraForTicker();
+    setInterval(buildTickerBar, 60 * 1000);
+  </script>
+</body>
+</html>
