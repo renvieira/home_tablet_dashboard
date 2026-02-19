@@ -39,31 +39,22 @@
     }
 
     body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 0; /* Removido padding do body para ocupar 100% */
+      /* Removido display: flex do body para evitar que ele tente centralizar múltiplos dashboards */
+      /* O dashboard principal já vai ocupar 100% da tela */
+      padding: 0; 
     }
 
     .dashboard {
       width: 100%;
       height: 100%;
       background: linear-gradient(135deg, rgba(8,10,20,0.94), rgba(5,5,10,0.98));
-      border-radius: 0; /* Removido border-radius para ocupar 100% da tela */
-      padding: 16px 18px; /* Mantido padding interno para o conteúdo */
+      border-radius: 0; 
+      padding: 16px 18px; 
       display: grid;
-      /* Ajuste para preencher 100% do espaço:
-         Relógio/Clima (20%)
-         Ticker (10%)
-         Notícias Financeiras (35% - maior)
-         Breaking Mundo (17.5%)
-         Tênis (17.5%)
-         Total: 100%
-      */
-      grid-template-rows: 20% 10% 35% 17.5% 17.5%; 
+      grid-template-rows: min-content min-content minmax(0, 1fr) minmax(0, 1fr); 
       gap: 10px;
-      box-shadow: none; /* Removido sombra para ocupar 100% da tela */
-      border: none; /* Removido borda para ocupar 100% da tela */
+      box-shadow: none; 
+      border: none; 
       position: relative;
       overflow: hidden;
     }
@@ -82,13 +73,13 @@
     .dashboard-inner {
       position: relative;
       z-index: 1;
-      display: contents;
+      display: contents; /* Isso faz com que os filhos do inner se comportem como filhos diretos do dashboard */
     }
 
     .row { 
       display: grid; 
       gap: 10px;
-      min-height: 0;
+      min-height: 0; 
     }
 
     .row-top     { grid-template-columns: 2.2fr 1.4fr; }
@@ -100,16 +91,16 @@
       background: radial-gradient(circle at top left, rgba(79,140,255,0.14), transparent 45%),
                   linear-gradient(145deg, rgba(14,18,30,0.96), rgba(11,12,22,0.98));
       border-radius: var(--radius-lg);
-      padding: 12px 16px; /* Aumentado padding */
+      padding: 12px 16px; 
       border: 1px solid var(--border-soft);
       box-shadow: 0 18px 40px rgba(0,0,0,0.55);
       display: flex;
       flex-direction: column;
-      gap: 8px; /* Aumentado gap */
+      gap: 8px; 
       position: relative;
       overflow: hidden;
       backdrop-filter: blur(var(--blur));
-      min-height: 0;
+      min-height: 0; 
     }
 
     .card::before {
@@ -124,42 +115,42 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px; /* Aumentado gap */
+      gap: 10px; 
       position: relative;
       z-index: 1;
       flex-shrink: 0;
-      margin-bottom: 3px; /* Aumentado margin */
+      margin-bottom: 3px; 
     }
 
     .card-title {
-      font-size: 1.02rem; /* Aumentado ~20% de 0.85rem */
+      font-size: 1.02rem; 
       text-transform: uppercase;
       letter-spacing: 0.12em;
       color: var(--text-soft);
     }
 
     .card-subtitle {
-      font-size: 0.86rem; /* Aumentado ~20% de 0.72rem */
+      font-size: 0.86rem; 
       color: var(--text-soft);
       opacity: 0.8;
     }
 
     .badge {
-      font-size: 0.84rem; /* Aumentado ~20% de 0.7rem */
-      padding: 4px 10px; /* Aumentado padding */
+      font-size: 0.84rem; 
+      padding: 4px 10px; 
       border-radius: 999px;
       background: rgba(0,0,0,0.5);
       border: 1px solid rgba(255,255,255,0.08);
       color: var(--text-soft);
       display: inline-flex;
       align-items: center;
-      gap: 5px; /* Aumentado gap */
+      gap: 5px; 
       white-space: nowrap;
     }
 
     .badge-dot {
-      width: 7px; /* Aumentado */
-      height: 7px; /* Aumentado */
+      width: 7px; 
+      height: 7px; 
       border-radius: 50%;
       background: var(--success);
       box-shadow: 0 0 10px rgba(61,214,140,0.8);
@@ -177,15 +168,15 @@
       min-height: 0;
     }
 
-    #time { font-size: 3.8rem; font-weight: 600; letter-spacing: 0.06em; } /* Aumentado ~20% de 3.2rem */
-    #date { font-size: 1.18rem; color: var(--text-soft); } /* Aumentado ~20% de 0.98rem */
+    #time { font-size: 3.8rem; font-weight: 600; letter-spacing: 0.06em; } 
+    #date { font-size: 1.18rem; color: var(--text-soft); } 
 
     .clock-footer {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-top: 5px; /* Aumentado margin */
-      font-size: 0.96rem; /* Aumentado ~20% de 0.8rem */
+      margin-top: 5px; 
+      font-size: 0.96rem; 
       color: var(--text-soft);
     }
 
@@ -193,65 +184,65 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 12px; /* Aumentado gap */
+      gap: 12px; 
       position: relative;
       z-index: 1;
     }
 
-    .weather-temp { font-size: 2.8rem; font-weight: 500; } /* Aumentado ~20% de 2.3rem */
-    .weather-city { font-size: 1.15rem; color: var(--text-soft); } /* Aumentado ~20% de 0.96rem */
-    .weather-desc { font-size: 1.03rem; color: var(--text-soft); } /* Aumentado ~20% de 0.86rem */
+    .weather-temp { font-size: 2.8rem; font-weight: 500; } 
+    .weather-city { font-size: 1.15rem; color: var(--text-soft); } 
+    .weather-desc { font-size: 1.03rem; color: var(--text-soft); } 
 
     .weather-extra {
       display: flex;
-      gap: 12px; /* Aumentado gap */
-      margin-top: 5px; /* Aumentado margin */
-      font-size: 0.94rem; /* Aumentado ~20% de 0.78rem */
+      gap: 12px; 
+      margin-top: 5px; 
+      font-size: 0.94rem; 
       color: var(--text-soft);
       flex-wrap: wrap;
     }
 
     .news-container {
-      flex: 1;
-      min-height: 0;
+      flex: 1; 
+      min-height: 0; 
       display: flex;
       flex-direction: column;
     }
 
     .news-list {
-      margin-top: 3px; /* Aumentado margin */
+      margin-top: 3px; 
       display: flex;
       flex-direction: column;
-      gap: 7px; /* Aumentado gap */
+      gap: 7px; 
       overflow-y: scroll;
       overflow-x: hidden;
-      padding-right: 10px; /* Aumentado padding */
+      padding-right: 10px; 
       position: relative;
       z-index: 1;
-      flex: 1;
-      min-height: 0;
+      flex: 1; 
+      min-height: 0; 
       -webkit-overflow-scrolling: touch;
       scrollbar-width: auto;
       scrollbar-color: #a0aab4 #1e232d;
     }
 
     .news-list::-webkit-scrollbar {
-      width: 12px; /* Aumentado */
+      width: 12px; 
       background: #1e232d;
-      border-radius: 7px; /* Aumentado */
+      border-radius: 7px; 
     }
 
     .news-list::-webkit-scrollbar-track {
       background: #1e232d;
-      border-radius: 7px; /* Aumentado */
-      margin: 5px 0; /* Aumentado */
+      border-radius: 7px; 
+      margin: 5px 0; 
     }
 
     .news-list::-webkit-scrollbar-thumb {
       background: #a0aab4;
-      border-radius: 7px; /* Aumentado */
+      border-radius: 7px; 
       border: 2px solid #1e232d;
-      min-height: 35px; /* Aumentado */
+      min-height: 35px; 
     }
 
     .news-list::-webkit-scrollbar-thumb:hover {
@@ -259,10 +250,10 @@
     }
 
     .news-item {
-      font-size: 0.98rem; /* Aumentado ~20% de 0.82rem */
+      font-size: 0.98rem; 
       color: var(--text-soft);
-      border-radius: 12px; /* Aumentado */
-      padding: 10px 12px; /* Aumentado padding */
+      border-radius: 12px; 
+      padding: 10px 12px; 
       background: rgba(9,11,22,0.9);
       border: 1px solid rgba(255,255,255,0.03);
       transition: all var(--transition-fast);
@@ -277,24 +268,24 @@
 
     .news-item-title {
       color: var(--text);
-      margin-bottom: 4px; /* Aumentado margin */
+      margin-bottom: 4px; 
       line-height: 1.4;
     }
 
     .news-item-meta {
-      font-size: 0.86rem; /* Aumentado ~20% de 0.72rem */
+      font-size: 0.86rem; 
       opacity: 0.8;
     }
 
     /* ===== Barra de Tickers Rolante ===== */
     .ticker-card {
-      padding: 8px 16px; /* Ajustado padding para diminuir altura e centralizar */
+      padding: 8px 16px; 
     }
 
     .ticker-wrapper {
       position: relative;
       overflow: hidden;
-      height: 36px; /* Altura um pouco maior para acomodar fonte */
+      height: 36px; 
       display: flex;
       align-items: center;
     }
@@ -302,7 +293,7 @@
     .ticker-track {
       display: inline-flex;
       align-items: baseline;
-      gap: 30px; /* Aumentado gap */
+      gap: 30px; 
       white-space: nowrap;
       will-change: transform;
       animation: ticker-scroll 45s linear infinite;
@@ -311,15 +302,15 @@
     .ticker-item {
       display: inline-flex;
       align-items: baseline;
-      gap: 8px; /* Aumentado gap */
-      font-size: 1.7rem; /* Dobrado de 0.85rem */
+      gap: 8px; 
+      font-size: 1.7rem; 
       color: var(--text-soft);
     }
 
     .ticker-symbol {
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      font-size: 1.56rem; /* Dobrado de 0.78rem */
+      font-size: 1.56rem; 
       color: #d0d7ff;
     }
 
@@ -329,7 +320,7 @@
     }
 
     .ticker-change {
-      font-size: 1.6rem; /* Dobrado de 0.8rem */
+      font-size: 1.6rem; 
     }
 
     .ticker-change.up { color: var(--success); }
@@ -341,16 +332,16 @@
     }
 
     /* Media queries para tablets e telas menores */
-    @media (max-width: 1024px) { /* Samsung A7 em landscape é ~1280x800, mas vamos considerar 1024px como um bom breakpoint */
+    @media (max-width: 1024px) { 
       .dashboard {
-        border-radius: 0; /* Garante que não haverá bordas arredondadas em telas cheias */
-        box-shadow: none; /* Remove sombra para telas cheias */
-        padding: 12px 14px; /* Ajusta padding interno para telas menores */
-        gap: 8px; /* Reduz o gap entre as linhas */
+        border-radius: 0; 
+        box-shadow: none; 
+        padding: 12px 14px; 
+        gap: 8px; 
       }
       .card {
-        padding: 10px 12px; /* Ajusta padding dos cards */
-        gap: 6px; /* Reduz o gap dentro dos cards */
+        padding: 10px 12px; 
+        gap: 6px; 
       }
       .card-header {
         gap: 8px;
@@ -388,14 +379,14 @@
       .ticker-change { font-size: 1.3rem; }
     }
 
-    @media (max-width: 768px) { /* Modo retrato de tablets ou celulares grandes */
+    @media (max-width: 768px) { 
       .dashboard {
-        grid-template-rows: auto auto auto auto auto; /* Volta para auto para melhor adaptação */
+        grid-template-rows: min-content min-content minmax(0, 1fr) minmax(0, 1fr); 
         padding: 10px 12px;
         gap: 6px;
       }
-      .row-top { grid-template-columns: 1fr; } /* Relógio e clima um abaixo do outro */
-      .row-bottom { grid-template-columns: 1fr; } /* Notícias um abaixo do outro */
+      .row-top { grid-template-columns: 1fr; } 
+      .row-bottom { grid-template-columns: 1fr; } 
 
       #time { font-size: 2.8rem; }
       #date { font-size: 0.95rem; }
@@ -415,6 +406,7 @@
       .news-list::-webkit-scrollbar-track { margin: 2px 0; }
       .news-list::-webkit-scrollbar-thumb { min-height: 25px; border-radius: 5px; }
 
+      .ticker-card { padding: 6px 12px; }
       .ticker-wrapper { height: 28px; }
       .ticker-track { animation-duration: 25s; }
       .ticker-item { font-size: 1.2rem; }
