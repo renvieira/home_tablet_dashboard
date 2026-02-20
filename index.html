@@ -767,6 +767,18 @@
       }
 
       try {
+        const ibovRes = await fetch('https://economia.awesomeapi.com.br/json/last/IBOV');
+        const ibovData = await ibovRes.json();
+        if (ibovData.IBOV) {
+          const price = parseFloat(ibovData.IBOV.bid);
+          const change = parseFloat(ibovData.IBOV.pctChange);
+          window.tickerData.ibov = { price, change };
+        }
+      } catch (e) {
+        console.warn('⚠️ IBOVESPA falhou');
+      }
+
+      try {
         const yahooUrl = 'https://query2.finance.yahoo.com/v8/finance/chart/%5EGSPC?interval=1d&range=1d';
         const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`;
         const res = await fetch(proxyUrl);
@@ -784,10 +796,6 @@
         }
       } catch (e) {
         console.warn('⚠️ S&P 500 falhou ou CORS bloqueou, usando padrão');
-      }
-
-      if (!window.tickerData.ibov) {
-        window.tickerData.ibov = null;
       }
 
       buildTickerBar();
@@ -846,7 +854,7 @@
       track.appendChild(createTickerItem('BITCOIN', d.btc?.price ?? null, d.btc?.change ?? null, false, 'USD'));
       track.appendChild(createTickerItem('ETHEREUM', d.eth?.price ?? null, d.eth?.change ?? null, false, 'USD'));
       track.appendChild(createTickerItem('S&P 500', d.sp500?.price ?? null, d.sp500?.change ?? null, false, 'pts'));
-      track.appendChild(createTickerItem('IBOVESPA', 130000, 0.00, false, 'pts'));
+      track.appendChild(createTickerItem('IBOVESPA', d.ibov?.price ?? null, d.ibov?.change ?? null, false, 'pts'));
 
       if (d.gold?.price != null) {
         track.appendChild(createTickerItem('OURO', d.gold.price, null, true));
