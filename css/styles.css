@@ -1,0 +1,407 @@
+  :root {
+      --bg: #05050a;
+      --bg-elevated: #11121a;
+      --bg-card: #181926;
+      --text: #f5f5f7;
+      --text-soft: #a9b0c3;
+      --accent: #4f8cff;
+      --accent-soft: rgba(79, 140, 255, 0.18);
+      --danger: #ff4f6a;
+      --success: #3dd68c;
+      --border-soft: rgba(255,255,255,0.05);
+      --shadow-soft: 0 18px 45px rgba(0,0,0,0.55);
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --blur: 18px;
+      --transition-fast: 0.18s ease-out;
+      --font-main: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100vh;
+      width: 100vw;
+      background: radial-gradient(circle at top, #151729 0, #05050a 50%);
+      color: var(--text);
+      font-family: var(--font-main);
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden; /* Garante que não haverá scroll indesejado */
+    }
+
+    body {
+      /* Removido display: flex do body para evitar que ele tente centralizar múltiplos dashboards */
+      /* O dashboard principal já vai ocupar 100% da tela */
+      padding: 0; 
+    }
+
+    .dashboard {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(8,10,20,0.94), rgba(5,5,10,0.98));
+      border-radius: 0; 
+      padding: 16px 18px; 
+      display: grid;
+      grid-template-rows: min-content min-content minmax(0, 1fr) minmax(0, 1fr); 
+      gap: 10px;
+      box-shadow: none; 
+      border: none; 
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dashboard::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background:
+        radial-gradient(circle at top left, rgba(79,140,255,0.08), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(61,214,140,0.05), transparent 55%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .dashboard-inner {
+      position: relative;
+      z-index: 1;
+      display: contents; /* Isso faz com que os filhos do inner se comportem como filhos diretos do dashboard */
+    }
+
+    .row { 
+      display: grid; 
+      gap: 10px;
+      min-height: 0; 
+    }
+
+    .row-top     { grid-template-columns: 2.2fr 1.4fr; }
+    .row-ticker  { grid-template-columns: 1fr; }
+    .row-finance { grid-template-columns: 1fr; }
+    .row-bottom  { grid-template-columns: 1fr 1fr; }
+
+    .card {
+      background: radial-gradient(circle at top left, rgba(79,140,255,0.14), transparent 45%),
+                  linear-gradient(145deg, rgba(14,18,30,0.96), rgba(11,12,22,0.98));
+      border-radius: var(--radius-lg);
+      padding: 12px 16px; 
+      border: 1px solid var(--border-soft);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.55);
+      display: flex;
+      flex-direction: column;
+      gap: 8px; 
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(var(--blur));
+      min-height: 0; 
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top right, rgba(255,255,255,0.02), transparent 55%);
+      pointer-events: none;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px; 
+      position: relative;
+      z-index: 1;
+      flex-shrink: 0;
+      margin-bottom: 3px; 
+    }
+
+    .card-title {
+      font-size: 1.02rem; 
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-soft);
+    }
+
+    .card-subtitle {
+      font-size: 0.86rem; 
+      color: var(--text-soft);
+      opacity: 0.8;
+    }
+
+    .badge {
+      font-size: 0.84rem; 
+      padding: 4px 10px; 
+      border-radius: 999px;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--text-soft);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px; 
+      white-space: nowrap;
+    }
+
+    .badge-dot {
+      width: 7px; 
+      height: 7px; 
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 10px rgba(61,214,140,0.8);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.5} }
+
+    #clock-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      z-index: 1;
+      min-height: 0;
+    }
+
+    #time { font-size: 3.8rem; font-weight: 600; letter-spacing: 0.06em; } 
+    #date { font-size: 1.18rem; color: var(--text-soft); } 
+
+    .clock-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 5px; 
+      font-size: 0.96rem; 
+      color: var(--text-soft);
+    }
+
+    #weather-main {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px; 
+      position: relative;
+      z-index: 1;
+    }
+
+    .weather-temp { font-size: 2.8rem; font-weight: 500; } 
+    .weather-city { font-size: 1.15rem; color: var(--text-soft); } 
+    .weather-desc { font-size: 1.03rem; color: var(--text-soft); } 
+
+    .weather-extra {
+      display: flex;
+      gap: 12px; 
+      margin-top: 5px; 
+      font-size: 0.94rem; 
+      color: var(--text-soft);
+      flex-wrap: wrap;
+    }
+
+    .news-container {
+      flex: 1; 
+      min-height: 0; 
+      display: flex;
+      flex-direction: column;
+    }
+
+    .news-list {
+      margin-top: 3px; 
+      display: flex;
+      flex-direction: column;
+      gap: 7px; 
+      overflow-y: scroll;
+      overflow-x: hidden;
+      padding-right: 10px; 
+      position: relative;
+      z-index: 1;
+      flex: 1; 
+      min-height: 0; 
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: auto;
+      scrollbar-color: #a0aab4 #1e232d;
+    }
+
+    .news-list::-webkit-scrollbar {
+      width: 12px; 
+      background: #1e232d;
+      border-radius: 7px; 
+    }
+
+    .news-list::-webkit-scrollbar-track {
+      background: #1e232d;
+      border-radius: 7px; 
+      margin: 5px 0; 
+    }
+
+    .news-list::-webkit-scrollbar-thumb {
+      background: #a0aab4;
+      border-radius: 7px; 
+      border: 2px solid #1e232d;
+      min-height: 35px; 
+    }
+
+    .news-list::-webkit-scrollbar-thumb:hover {
+      background: #b4bec9;
+    }
+
+    .news-item {
+      font-size: 0.98rem; 
+      color: var(--text-soft);
+      border-radius: 12px; 
+      padding: 10px 12px; 
+      background: rgba(9,11,22,0.9);
+      border: 1px solid rgba(255,255,255,0.03);
+      transition: all var(--transition-fast);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .news-item:hover {
+      background: rgba(15,17,28,0.95);
+      border-color: rgba(79,140,255,0.15);
+    }
+
+    .news-item-title {
+      color: var(--text);
+      margin-bottom: 4px; 
+      line-height: 1.4;
+    }
+
+    .news-item-meta {
+      font-size: 0.86rem; 
+      opacity: 0.8;
+    }
+
+    /* ===== Barra de Tickers Rolante ===== */
+    .ticker-card {
+      padding: 8px 16px; 
+    }
+
+    .ticker-wrapper {
+      position: relative;
+      overflow: hidden;
+      height: 36px; 
+      display: flex;
+      align-items: center;
+    }
+
+    .ticker-track {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 30px; 
+      white-space: nowrap;
+      will-change: transform;
+      animation: ticker-scroll 45s linear infinite;
+    }
+
+    .ticker-item {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 8px; 
+      font-size: 1.7rem; 
+      color: var(--text-soft);
+    }
+
+    .ticker-symbol {
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 1.56rem; 
+      color: #d0d7ff;
+    }
+
+    .ticker-price {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .ticker-change {
+      font-size: 1.6rem; 
+    }
+
+    .ticker-change.up { color: var(--success); }
+    .ticker-change.down { color: var(--danger); }
+
+    @keyframes ticker-scroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* Media queries para tablets e telas menores */
+    @media (max-width: 1024px) { 
+      .dashboard {
+        border-radius: 0; 
+        box-shadow: none; 
+        padding: 12px 14px; 
+        gap: 8px; 
+      }
+      .card {
+        padding: 10px 12px; 
+        gap: 6px; 
+      }
+      .card-header {
+        gap: 8px;
+        margin-bottom: 2px;
+      }
+      .card-title { font-size: 0.95rem; }
+      .card-subtitle { font-size: 0.8rem; }
+      .badge { font-size: 0.78rem; padding: 3px 8px; }
+      .badge-dot { width: 6px; height: 6px; }
+
+      #time { font-size: 3.2rem; }
+      #date { font-size: 1.05rem; }
+      .clock-footer { font-size: 0.88rem; }
+
+      .weather-temp { font-size: 2.4rem; }
+      .weather-city { font-size: 1.05rem; }
+      .weather-desc { font-size: 0.95rem; }
+      .weather-extra { font-size: 0.85rem; gap: 10px; }
+      #weather-icon { font-size: 2.4rem !important; }
+
+      .news-item { font-size: 0.9rem; padding: 8px 10px; border-radius: 10px; }
+      .news-item-title { margin-bottom: 3px; }
+      .news-item-meta { font-size: 0.8rem; }
+      .news-list { gap: 6px; padding-right: 8px; }
+      .news-list::-webkit-scrollbar { width: 10px; }
+      .news-list::-webkit-scrollbar-track { margin: 4px 0; }
+      .news-list::-webkit-scrollbar-thumb { min-height: 30px; border-radius: 6px; }
+
+      .ticker-card { padding: 6px 12px; }
+      .ticker-wrapper { height: 32px; }
+      .ticker-track { gap: 24px; animation-duration: 35s; }
+      .ticker-item { font-size: 1.4rem; gap: 6px; }
+      .ticker-symbol { font-size: 1.3rem; }
+      .ticker-price { font-size: 1.4rem; }
+      .ticker-change { font-size: 1.3rem; }
+    }
+
+    @media (max-width: 768px) { 
+      .dashboard {
+        grid-template-rows: min-content min-content minmax(0, 1fr) minmax(0, 1fr); 
+        padding: 10px 12px;
+        gap: 6px;
+      }
+      .row-top { grid-template-columns: 1fr; } 
+      .row-bottom { grid-template-columns: 1fr; } 
+
+      #time { font-size: 2.8rem; }
+      #date { font-size: 0.95rem; }
+      .clock-footer { font-size: 0.8rem; }
+
+      .weather-temp { font-size: 2rem; }
+      .weather-city { font-size: 0.9rem; }
+      .weather-desc { font-size: 0.8rem; }
+      .weather-extra { font-size: 0.75rem; gap: 8px; }
+      #weather-icon { font-size: 2rem !important; }
+
+      .news-item { font-size: 0.85rem; padding: 6px 8px; }
+      .news-item-title { margin-bottom: 2px; }
+      .news-item-meta { font-size: 0.75rem; }
+      .news-list { gap: 4px; padding-right: 6px; }
+      .news-list::-webkit-scrollbar { width: 8px; }
+      .news-list::-webkit-scrollbar-track { margin: 2px 0; }
+      .news-list::-webkit-scrollbar-thumb { min-height: 25px; border-radius: 5px; }
+
+      .ticker-card { padding: 6px 12px; }
+      .ticker-wrapper { height: 28px; }
+      .ticker-track { animation-duration: 25s; }
+      .ticker-item { font-size: 1.2rem; }
+      .ticker-symbol { font-size: 1.1rem; }
+      .ticker-price { font-size: 1.2rem; }
+      .ticker-change { font-size: 1.1rem; }
+    }
